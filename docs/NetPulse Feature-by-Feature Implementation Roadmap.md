@@ -2896,5 +2896,3 @@ Alert → WebSocket → Desktop / Arduino
 ```text
 Recovery → Resolution → Closure → Audit
 ```
-
-عندما تعمل هذه السلسلة كاملة، يكون لديك **Core NetPulse الحقيقي**. بعد ذلك تصبح الـ Dashboard والـ PHP Portal والتقارير تحسينات فوق نظام يعمل فعلاً، وليست واجهات جميلة فوق نظام غير مكتمل.
