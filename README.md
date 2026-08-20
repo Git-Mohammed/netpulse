@@ -227,7 +227,7 @@ This project is currently intended for **academic and educational purposes**.
 
 ### 👨‍💻 Developed & Architected by **Eng. Mohammed Fares**
 
-* Software Engineer*  
+*Software Engineer*  
 
 <p align="center">
   <a href="https://www.linkedin.com/in/-mohammedsaif/" target="_blank">
