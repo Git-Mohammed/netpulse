@@ -2838,28 +2838,3 @@ Audit
     
 - Alert → Incident → Ticket → ACK → Closure.
     
-
-أما التفاصيل التالية فتحتاج إلى قرارات تنفيذية مستقلة قبل البرمجة النهائية:
-
-```text
-Exact Java Framework
-Exact Python Libraries
-Exact WebSocket Library
-Authentication Protocol
-API Contract
-Exact SNMP Version
-Message Serialization Format
-Database Migration Strategy
-Oracle ↔ MySQL Synchronization Contract
-Ticket API Contract
-Arduino Communication Protocol
-Retry Policy
-Queue Technology
-Deployment Infrastructure
-Backup Strategy
-Disaster Recovery
-```
-
-والسبب في عدم افتراضها تلقائياً هو الحفاظ على **سلامة الـ Architecture وعدم تحويل الافتراضات إلى Requirements غير موجودة في المصدر**.
-
----
