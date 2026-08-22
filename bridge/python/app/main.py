@@ -1,18 +1,20 @@
+import asyncio
 import logging
+from app.config import settings
+from app.logging_config import setup_logging
+from app.collectors.syslog_listener import start_syslog_server
 
-from app.config import APP_NAME, APP_ENV
-from app.logging_config import configure_logging
+setup_logging()
+logger = logging.getLogger("NetPulse.Bridge.Main")
 
-
-def main():
-
-    configure_logging()
-
-    logger = logging.getLogger("netpulse.bridge")
-
-    logger.info("%s Python Bridge started.", APP_NAME)
-    logger.info("Environment: %s", APP_ENV)
-
+async def main():
+    logger.info(f"Starting {settings.APP_NAME} Python Bridge in {settings.APP_ENV} mode...")
+    
+    # تشغيل مستقبل الـ Syslog كـ Background Task
+    await start_syslog_server()
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Python Bridge stopped by user.")

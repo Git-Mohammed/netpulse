@@ -1,0 +1,1 @@
+<?php echo '<h1>NetPulse Ticketing Portal - Architecture is Ready!</h1>'; ?> 
