@@ -114,7 +114,7 @@ class TicketRepository {
      * @param array $data Associative array containing ticket details.
      * @return int Returns the last inserted primary key ID of the new ticket.
      */
-    public function createTicket(array $data): int {
+    public function createt(array $data): int {
         $sql = "INSERT INTO TICKET (ticket_number, incident_id, title, description, priority, status, created_at) 
                 VALUES (:ticket_number, :incident_id, :title, :description, :priority, 'OPEN', NOW())";
         

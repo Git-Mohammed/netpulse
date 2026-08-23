@@ -292,3 +292,213 @@ footer {
   color: var(--accent-color);
   text-decoration: underline;
 }
+/* --- Professional Navbar Styling --- */
+.netpulse-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin-bottom: 35px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.netpulse-navbar .brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.netpulse-navbar .brand h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-color);
+  letter-spacing: -0.5px;
+}
+
+.netpulse-navbar .brand h1 span {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.netpulse-navbar .brand p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 0;
+}
+
+/* روابط التنقل */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+  background-color: var(--bg-color);
+}
+
+.nav-links a.active {
+  color: var(--accent-color);
+  background-color: var(--bg-color);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+/* زر إنشاء تذكرة بارز */
+.nav-btn-action {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.nav-btn-action:hover {
+  opacity: 0.9;
+  background-color: var(--accent-color) !important;
+}
+/* إضافات جديدة لتنسيق النماذج وصفحة التفاصيل بالهوية البصرية */
+.portal-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 32px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ticket-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.ticket-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  background: var(--bg-color);
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.alert-box {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.alert-success {
+  background: #d1fae5;
+  color: var(--low-color);
+}
+.alert-error {
+  background: #fee2e2;
+  color: var(--critical-color);
+}
+
+/* =========================================
+   Dashboard Charts & Metrics
+========================================= */
+
+/* تحسين بطاقات الإحصائيات العلوية */
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-color);
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+/* شبكة الرسوم البيانية (Charts Grid) */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.chart-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+/* استجابة الشاشات الصغيرة للمخططات */
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

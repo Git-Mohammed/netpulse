@@ -20,7 +20,28 @@ class TicketController {
     public function __construct() {
         $this->ticketService = new TicketService();
     }
+public function show(int $id): ?Ticket {
+    return $this->ticketService->getTicketDetails($id);
+}
 
+public function updateStatus(): void {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $ticketId = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : 0;
+        $newStatus = $_POST['status'] ?? '';
+        $note = $_POST['note'] ?? null;
+        $changedBy = 1; // معرف المستخدم الافتراضي (المشرف أو المهندس الحالي)
+
+        try {
+            $this->ticketService->changeTicketStatus($ticketId, $newStatus, $changedBy, $note);
+            header("Location: index.php?page=tickets-show&id={$ticketId}&success=1");
+            exit;
+        } catch (Exception $e) {
+            $error = urlencode($e->getMessage());
+            header("Location: index.php?page=tickets-show&id={$ticketId}&error={$error}");
+            exit;
+        }
+    }
+}
     /**
      * Renders the main tickets dashboard data.
      * 

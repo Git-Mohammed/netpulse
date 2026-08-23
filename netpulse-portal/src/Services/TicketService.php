@@ -113,4 +113,20 @@ class TicketService {
             throw new Exception("خطأ أثناء تنفيذ معاملة التحديث: " . $e->getMessage());
         }
     }
+    public function generateAutomatedTicket(array $payload): string {
+        // توليد رقم مرجعي تسلسلي افتراضي بناءً على السنة
+        $year = date('Y');
+        $randomNumber = rand(1000, 9999);
+        $ticketNumber = "TKT-{$year}-{$randomNumber}";
+
+        $ticketData = [
+            'ticket_number' => $ticketNumber,
+            'incident_id'   => $payload['incident_id'] ?? null,
+            'title'         => $payload['title'],
+            'description'   => $payload['description'],
+            'priority'      => $payload['priority'] ?? 'CRITICAL'
+        ];
+
+        return $this->ticketRepository->create($ticketData);
+    }
 }
