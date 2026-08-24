@@ -10,6 +10,8 @@
  * @author Mohammed Bin Fares
  * @version 1.0.1
  */
+
+require_once __DIR__ . '/User.php';
 class Ticket {
 
     /**
@@ -46,7 +48,10 @@ class Ticket {
      * @var string The current workflow status (OPEN, ASSIGNED, IN_PROGRESS, WAITING, RESOLVED, CLOSED).
      */
     public string $status;
-
+/**
+     * @var User|null The user object representing the assigned engineer.
+     */
+    public ?User $assignedEngineer = null;
     /**
      * @var int|null The user ID of the support engineer assigned to this ticket.
      */
@@ -83,8 +88,16 @@ class Ticket {
             $this->description  = $data['description'] ?? '';
             $this->priority     = $data['priority'] ?? 'MEDIUM';
             $this->status       = $data['status'] ?? 'OPEN';
-            $this->assignedTo   = isset($data['assigned_to']) ? (int) $data['assigned_to'] : null;
-            $this->createdAt    = $data['created_at'] ?? '';
+// إذا كانت البيانات تحتوي على تفاصيل المهندس المستعلمة عبر JOIN
+            if (isset($data['username'])) {
+                $this->assignedEngineer = new User([
+                    'user_id'    => $data['assigned_to'],
+                    'username'   => $data['username'],
+                    'email'      => $data['email'] ?? '',
+                    'role'       => $data['role'] ?? 'ENGINEER',
+                    'created_at' => $data['user_created_at'] ?? ''
+                ]);
+            }            $this->createdAt    = $data['created_at'] ?? '';
             $this->updatedAt    = $data['updated_at'] ?? null;
             $this->closedAt     = $data['closed_at'] ?? null;
         }

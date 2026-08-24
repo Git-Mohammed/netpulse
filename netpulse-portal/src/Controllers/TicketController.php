@@ -23,7 +23,27 @@ class TicketController {
 public function show(int $id): ?Ticket {
     return $this->ticketService->getTicketDetails($id);
 }
+/**
+     * Handles assigning or changing the assigned engineer for a ticket.
+     */
+    public function assignEngineer(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $ticketId = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : 0;
+            // إذا كان الحقل فارغاً نرسل null لإلغاء التعيين، وإلا نحوله إلى رقم صحيح
+            $assignedTo = !empty($_POST['assigned_to']) ? (int)$_POST['assigned_to'] : null;
 
+            try {
+                // استدعاء دالة التعيين من الـ TicketService
+                $this->ticketService->assignEngineer($ticketId, $assignedTo);
+                header("Location: index.php?page=tickets-show&id={$ticketId}&success=assigned");
+                exit;
+            } catch (Exception $e) {
+                $error = urlencode($e->getMessage());
+                header("Location: index.php?page=tickets-show&id={$ticketId}&error={$error}");
+                exit;
+            }
+        }
+    }
 public function updateStatus(): void {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ticketId = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : 0;

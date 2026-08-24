@@ -79,8 +79,15 @@ $tickets = $tickets ?? [];
                             <span class="badge <?php echo $pClass; ?>"><?php echo htmlspecialchars($ticket->priority, ENT_QUOTES, 'UTF-8'); ?></span>
                         </td>
                         <td><span class="status-pill"><?php echo htmlspecialchars($ticket->status, ENT_QUOTES, 'UTF-8'); ?></span></td>
-                        <td><?php echo $ticket->assignedTo ? 'مهندس #' . htmlspecialchars($ticket->assignedTo, ENT_QUOTES, 'UTF-8') : '<span style="color: #9ca3af;">غير مُعين</span>'; ?></td>
-                        <td style="font-family: 'Inter', sans-serif; font-size: 13px;"><?php echo htmlspecialchars($ticket->createdAt, ENT_QUOTES, 'UTF-8'); ?></td>
+<td>
+    <?php if ($ticket->assignedEngineer && !empty($ticket->assignedEngineer->username)): ?>
+        <strong style="color: var(--text-main);">
+            <?php echo htmlspecialchars($ticket->assignedEngineer->username, ENT_QUOTES, 'UTF-8'); ?>
+        </strong>
+    <?php else: ?>
+        <span style="color: #9ca3af; font-style: italic;">غير مُعين</span>
+    <?php endif; ?>
+</td>                        <td style="font-family: 'Inter', sans-serif; font-size: 13px;"><?php echo htmlspecialchars($ticket->createdAt, ENT_QUOTES, 'UTF-8'); ?></td>
                         <td>
                             <a href="index.php?page=tickets-show&id=<?php echo $ticket->ticketId; ?>" style="color: var(--medium-color); text-decoration: none; font-weight: 500;">عرض التفاصيل</a>
                         </td>

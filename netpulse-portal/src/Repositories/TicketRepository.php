@@ -52,7 +52,7 @@ class TicketRepository {
         return $tickets;
     }
 
-    /**
+ /**
      * Retrieves tickets filtered by status and/or priority, ordered by creation date descending.
      * 
      * @param string|null $status The ticket status to filter by.
@@ -60,20 +60,24 @@ class TicketRepository {
      * @return Ticket[] Returns an array of matching Ticket domain objects.
      */
     public function getFilteredTickets(?string $status, ?string $priority): array {
-        $sql = "SELECT * FROM TICKET WHERE 1=1";
+        $sql = "SELECT t.*, 
+                       u.username, u.email, u.role, u.created_at AS user_created_at 
+                FROM TICKET t 
+                LEFT JOIN WEB_USER u ON t.assigned_to = u.user_id 
+                WHERE 1=1";
         $params = [];
 
         if (!empty($status)) {
-            $sql .= " AND status = :status";
+            $sql .= " AND t.status = :status";
             $params['status'] = $status;
         }
 
         if (!empty($priority)) {
-            $sql .= " AND priority = :priority";
+            $sql .= " AND t.priority = :priority";
             $params['priority'] = $priority;
         }
 
-        $sql .= " ORDER BY created_at DESC";
+        $sql .= " ORDER BY t.created_at DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -88,14 +92,20 @@ class TicketRepository {
         return $tickets;
     }
 
-    /**
-     * Finds a specific ticket by its unique internal identifier.
+/**
+     * Finds a specific ticket by its unique internal identifier along with assigned engineer details.
      * 
      * @param int $ticketId The internal primary key ID of the ticket.
      * @return Ticket|null Returns a Ticket object if found, or null otherwise.
      */
     public function findById(int $ticketId): ?Ticket {
-        $sql = "SELECT * FROM TICKET WHERE ticket_id = :ticket_id LIMIT 1";
+        $sql = "SELECT t.*, 
+                       u.username, u.email, u.role, u.created_at AS user_created_at 
+                FROM TICKET t 
+                LEFT JOIN WEB_USER u ON t.assigned_to = u.user_id 
+                WHERE t.ticket_id = :ticket_id 
+                LIMIT 1";
+                
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['ticket_id' => $ticketId]);
         
@@ -107,7 +117,6 @@ class TicketRepository {
 
         return new Ticket($record);
     }
-
     /**
      * Creates a new ticket record in the database.
      * 
@@ -148,5 +157,48 @@ class TicketRepository {
         ]);
 
         return $stmt->rowCount() > 0;
+    }
+
+
+    /**
+     * Retrieves all tickets along with assigned engineer details using JOIN.
+     * 
+     * @return Ticket[]
+     */
+    public function getAllTicketsWithEngineer(): array {
+        $sql = "SELECT t.*, 
+                       u.username, u.email, u.role, u.created_at AS user_created_at
+                FROM TICKET t
+                LEFT JOIN WEB_USER u ON t.assigned_to = u.user_id
+                ORDER BY t.created_at DESC";
+                
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        
+        $rawRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $tickets = [];
+
+        foreach ($rawRecords as $record) {
+            $tickets[] = new Ticket($record);
+        }
+
+        return $tickets;
+    }
+
+    /**
+     * Updates the assigned engineer for a specific ticket.
+     * 
+     * @param int $ticketId
+     * @param int|null $engineerId
+     * @return bool
+     */
+    public function updateAssignedEngineer(int $ticketId, ?int $engineerId): bool {
+        $sql = "UPDATE TICKET SET assigned_to = :assigned_to, updated_at = NOW() WHERE ticket_id = :ticket_id";
+        $stmt = $this->db->prepare($sql);
+        
+        return $stmt->execute([
+            'assigned_to' => $engineerId,
+            'ticket_id'   => $ticketId
+        ]);
     }
 }

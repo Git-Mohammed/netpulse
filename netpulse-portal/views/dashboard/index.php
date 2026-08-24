@@ -138,10 +138,19 @@ $selectedPriority = $_GET['priority'] ?? '';
                             <span class="badge <?php echo $pClass; ?>"><?php echo htmlspecialchars($ticket->priority, ENT_QUOTES, 'UTF-8'); ?></span>
                         </td>
                         <td><span class="status-pill"><?php echo htmlspecialchars($ticket->status, ENT_QUOTES, 'UTF-8'); ?></span></td>
-                        <td><?php echo $ticket->assignedTo ? 'مهندس #' . htmlspecialchars($ticket->assignedTo, ENT_QUOTES, 'UTF-8') : '<span style="color: #9ca3af;">غير مُعين</span>'; ?></td>
                         <td>
+    <?php if ($ticket->assignedEngineer && !empty($ticket->assignedEngineer->username)): ?>
+        <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-main); font-weight: 500;">
+            <i class="ph-bold ph-user-circle" style="color: var(--medium-color);"></i>
+            <?php echo htmlspecialchars($ticket->assignedEngineer->username, ENT_QUOTES, 'UTF-8'); ?>
+        </span>
+    <?php else: ?>
+        <span style="color: #9ca3af; font-style: italic;">غير مُعين</span>
+    <?php endif; ?>
+</td>                        <td>
                             <a href="index.php?page=tickets-show&id=<?php echo $ticket->ticketId; ?>" style="color: var(--medium-color); text-decoration: none; font-weight: 500;">عرض التفاصيل</a>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

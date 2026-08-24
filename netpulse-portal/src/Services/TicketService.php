@@ -129,4 +129,23 @@ class TicketService {
 
         return $this->ticketRepository->create($ticketData);
     }
+
+    /**
+     * Assigns or re-assigns a ticket to a specific engineer.
+     * 
+     * @param int $ticketId
+     * @param int|null $engineerId
+     * @return bool
+     * @throws Exception
+     */
+    public function assignEngineer(int $ticketId, ?int $engineerId): bool {
+        // التحقق من وجود التذكرة أولاً
+        $ticket = $this->getTicketDetails($ticketId);
+        
+        $isUpdated = $this->ticketRepository->updateAssignedEngineer($ticketId, $engineerId);
+        if (!$isUpdated) {
+            throw new Exception("فشل تعيين المهندس المسؤول للتذكرة.");
+        }
+        return true;
+    }
 }
