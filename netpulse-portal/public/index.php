@@ -29,7 +29,9 @@ switch ($page) {
     case 'tickets-create':
         include __DIR__ . '/../views/tickets/create.php';
         break;
-
+case 'tickets-store':
+        $controller->store();
+        break;
     case 'tickets-show':    
         $ticketId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $ticket = $controller->show($ticketId);
