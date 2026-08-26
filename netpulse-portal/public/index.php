@@ -1,22 +1,82 @@
 <?php
 /**
- * NetPulse Portal - Front Controller / Router
+ * NetPulse Portal - Front Controller / Central Router
+ * 
+ * @package NetPulse\Core
+ * @version 1.1.1
+ * @author  NetPulse Development Team
  */
 
-// استدعاء وحدة التحكم الخاصة بالتذاكر
+declare(strict_types=1);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// -------------------------------------------------------------------------
+// 1. Dependency Imports
+// -------------------------------------------------------------------------
 require_once __DIR__ . '/../src/Controllers/TicketController.php';
+require_once __DIR__ . '/../src/Controllers/AuthController.php';
+require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 
-$controller = new TicketController();
-$page = $_GET['page'] ?? 'dashboard';
+// // استيراد مسارات النطاق (Namespaces) بشكل صحيح لتجنب خطأ Class not found
+// use src\Controllers\TicketController;
+// use src\Controllers\AuthController;
+// use src\Repositories\UserRepository;
 
-// جلب البيانات (التذاكر والفلاتر) ليتم مشاركتها مع العروض
-$data = $controller->index();
+// -------------------------------------------------------------------------
+// 2. Controller Initialization
+// -------------------------------------------------------------------------
+$ticketController = new TicketController();
+$authController   = new AuthController();
+
+$page = filter_input(INPUT_GET, 'page', FILTER_DEFAULT) ?? 'dashboard';
+
+// // -------------------------------------------------------------------------
+// // 3. Authentication Middleware & Security Guards
+// // -------------------------------------------------------------------------
+// $publicPages = ['login', 'login-submit'];
+// $isAuthenticated = isset($_SESSION['user_id']);
+
+// if (!$isAuthenticated && !in_array($page, $publicPages, true)) {
+//     header('Location: /index.php?page=login');
+//     exit;
+// }
+
+// if ($isAuthenticated && in_array($page, $publicPages, true)) {
+//     header('Location: /index.php?page=dashboard');
+//     exit;
+// }
+
+// // -------------------------------------------------------------------------
+// // 4. Standalone Authentication Routes
+// // -------------------------------------------------------------------------
+// switch ($page) {
+//     case 'login':
+//         $authController->showLoginForm();
+//         exit;
+
+//     case 'login-submit':
+//         $authController->login();
+//         exit;
+
+//     case 'logout':
+//         $authController->logout();
+//         exit;
+// }
+
+// -------------------------------------------------------------------------
+// 5. Global Data Preparation & Layout Header
+// -------------------------------------------------------------------------
+$data = $ticketController->index();
 $tickets = $data['tickets'] ?? [];
 
-// تضمين رأس الصفحة المشترك (Header)
 include __DIR__ . '/../views/layouts/header.php';
 
-// نظام التوجيه (Routing) بناءً على قيمة المتغير page
+// -------------------------------------------------------------------------
+// 6. Centralized Request Routing & Dispatcher
+// -------------------------------------------------------------------------
 switch ($page) {
     case 'dashboard':
         include __DIR__ . '/../views/dashboard/index.php';
@@ -29,27 +89,31 @@ switch ($page) {
     case 'tickets-create':
         include __DIR__ . '/../views/tickets/create.php';
         break;
-case 'tickets-store':
-        $controller->store();
+
+    case 'tickets-store':
+        $ticketController->store();
         break;
+
     case 'tickets-show':    
-        $ticketId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        $ticket = $controller->show($ticketId);
+        $ticketId = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : 0;
+        $ticket = $ticketController->show($ticketId);
         
-        // استدعاء قائمة المهندسين لتظهر في القائمة المنسدلة
-        require_once __DIR__ . '/../src/Repositories/UserRepository.php';
         $userRepo = new UserRepository();
         $engineers = $userRepo->getAllEngineers();
 
         include __DIR__ . '/../views/tickets/show.php';
         break;
-        case 'tickets-assign':
-            $controller->assignEngineer();
-            break;
-case 'tickets-update-status':
-        $controller->updateStatus();
+
+    case 'tickets-assign':
+        $ticketController->assignEngineer();
         break;
+
+    case 'tickets-update-status':
+        $ticketController->updateStatus();
+        break;
+
     default:
+        http_response_code(404);
         echo '<div class="table-section" style="padding: 40px; text-align: center; color: var(--critical-color);">'
            . '<h3>الصفحة المطلوبة غير موجودة (404)</h3>'
            . '<p style="color: var(--text-secondary); margin-top: 10px;">عذراً، المسار الذي تحاول الوصول إليه غير متوفر في النظام.</p>'
@@ -57,5 +121,4 @@ case 'tickets-update-status':
         break;
 }
 
-// تضمين تذييلة الصفحة المشتركة (Footer)
 include __DIR__ . '/../views/layouts/footer.php';

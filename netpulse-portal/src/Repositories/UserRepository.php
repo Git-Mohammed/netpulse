@@ -39,7 +39,11 @@ class UserRepository {
 
         return new User($record);
     }
-
+    public function findByUsername(string $username): ?array {
+            $stmt = $this->db->prepare("SELECT * FROM WEB_USER WHERE username = ?");
+            $stmt->execute([$username]);
+            return $stmt->fetch() ?: null;
+        }
     /**
      * Retrieves all engineers available for assignment.
      * 
