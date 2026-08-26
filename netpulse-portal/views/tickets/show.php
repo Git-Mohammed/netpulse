@@ -286,10 +286,10 @@ $ticket = $ticket ?? null;
                             <option value="">-- اختر المهندس --</option>
                             <?php 
                                 $engineers = $engineers ?? []; 
+                                echo $engineers;
                                 foreach ($engineers as $engineer): 
                             ?>
-                                <option value="<?php echo $engineer->userId; ?>" <?php echo ($ticket->assignedTo === $engineer->userId) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($engineer->username, ENT_QUOTES, 'UTF-8'); ?> (<?php echo $engineer->role; ?>)
+<option value="<?php echo $engineer->userId; ?>" <?php echo (isset($ticket->assignedTo) && $ticket->assignedTo === $engineer->userId) ? 'selected' : ''; ?>>                                    <?php echo htmlspecialchars($engineer->username, ENT_QUOTES, 'UTF-8'); ?> (<?php echo $engineer->role; ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>

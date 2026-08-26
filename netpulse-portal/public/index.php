@@ -33,8 +33,17 @@ switch ($page) {
     case 'tickets-show':    
         $ticketId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $ticket = $controller->show($ticketId);
+        
+        // استدعاء قائمة المهندسين لتظهر في القائمة المنسدلة
+        require_once __DIR__ . '/../src/Repositories/UserRepository.php';
+        $userRepo = new UserRepository();
+        $engineers = $userRepo->getAllEngineers();
+
         include __DIR__ . '/../views/tickets/show.php';
         break;
+        case 'tickets-assign':
+            $controller->assignEngineer();
+            break;
 case 'tickets-update-status':
         $controller->updateStatus();
         break;
