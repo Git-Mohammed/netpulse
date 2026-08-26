@@ -36,7 +36,13 @@
     <nav class="nav-links">
         <?php 
             $currentPage = $_GET['page'] ?? 'dashboard'; 
+            // التأكد من بدء الجلسة للتحقق من الصلاحيات
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN';
         ?>
+        
         <a href="index.php?page=dashboard" class="nav-item <?php echo ($currentPage === 'dashboard') ? 'active' : ''; ?>">
             <i class="ph ph-squares-four"></i>
             لوحة التحكم
@@ -51,7 +57,27 @@
             <i class="ph-bold ph-plus"></i>
             تذكرة جديدة
         </a>
+
+        <!-- روابط الإدارة (تظهر فقط للمدير Admin) -->
+        <?php if ($isAdmin): ?>
+            <!-- تبويب إدارة المستخدمين -->
+            <a href="index.php?page=users-list" class="nav-item <?php echo ($currentPage === 'users-list') ? 'active' : ''; ?>">
+                <i class="ph ph-users"></i>
+                إدارة المستخدمين
+            </a>
+
+            <!-- رابط إضافة مستخدم جديد -->
+            <a href="index.php?page=users-create" class="nav-item <?php echo ($currentPage === 'users-create') ? 'active' : ''; ?>" style="border: 1px dashed var(--noc-primary, #3b82f6);">
+                <i class="ph ph-user-plus"></i>
+                إضافة مستخدم
+            </a>
+        <?php endif; ?>
         
+        <!-- زر تسجيل الخروج -->
+        <a href="index.php?page=logout" class="nav-item" style="color: #fca5a5;" title="تسجيل الخروج">
+            <i class="ph ph-sign-out"></i>
+        </a>
+
         <!-- زر الإشعارات -->
         <button class="icon-btn" aria-label="الإشعارات" style="background: none; border: 1px solid var(--border-color); padding: 8px 10px; border-radius: 6px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center;">
             <i class="ph ph-bell" style="font-size: 16px;"></i>

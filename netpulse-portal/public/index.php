@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../src/Controllers/TicketController.php';
 require_once __DIR__ . '/../src/Controllers/AuthController.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
-
+require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 // // استيراد مسارات النطاق (Namespaces) بشكل صحيح لتجنب خطأ Class not found
 // use src\Controllers\TicketController;
 // use src\Controllers\AuthController;
@@ -30,41 +30,42 @@ require_once __DIR__ . '/../src/Repositories/UserRepository.php';
 // -------------------------------------------------------------------------
 $ticketController = new TicketController();
 $authController   = new AuthController();
-
+$userRepo = new UserRepository();
+$userRepo->ensureDefaultAdminExists(); // سيتم إنشاء المستخدم تلقائياً إذا كان الجدول فارغاً
 $page = filter_input(INPUT_GET, 'page', FILTER_DEFAULT) ?? 'dashboard';
 
-// // -------------------------------------------------------------------------
-// // 3. Authentication Middleware & Security Guards
-// // -------------------------------------------------------------------------
-// $publicPages = ['login', 'login-submit'];
-// $isAuthenticated = isset($_SESSION['user_id']);
+// -------------------------------------------------------------------------
+// 3. Authentication Middleware & Security Guards
+// -------------------------------------------------------------------------
+$publicPages = ['login', 'login-submit'];
+$isAuthenticated = isset($_SESSION['user_id']);
 
-// if (!$isAuthenticated && !in_array($page, $publicPages, true)) {
-//     header('Location: /index.php?page=login');
-//     exit;
-// }
+if (!$isAuthenticated && !in_array($page, $publicPages, true)) {
+    header('Location: /index.php?page=login');
+    exit;
+}
 
-// if ($isAuthenticated && in_array($page, $publicPages, true)) {
-//     header('Location: /index.php?page=dashboard');
-//     exit;
-// }
+if ($isAuthenticated && in_array($page, $publicPages, true)) {
+    header('Location: /index.php?page=dashboard');
+    exit;
+}
 
-// // -------------------------------------------------------------------------
-// // 4. Standalone Authentication Routes
-// // -------------------------------------------------------------------------
-// switch ($page) {
-//     case 'login':
-//         $authController->showLoginForm();
-//         exit;
+// -------------------------------------------------------------------------
+// 4. Standalone Authentication Routes
+// -------------------------------------------------------------------------
+switch ($page) {
+    case 'login':
+        $authController->showLoginForm();
+        exit;
 
-//     case 'login-submit':
-//         $authController->login();
-//         exit;
+    case 'login-submit':
+        $authController->login();
+        exit;
 
-//     case 'logout':
-//         $authController->logout();
-//         exit;
-// }
+    case 'logout':
+        $authController->logout();
+        exit;
+}
 
 // -------------------------------------------------------------------------
 // 5. Global Data Preparation & Layout Header
@@ -93,7 +94,15 @@ switch ($page) {
     case 'tickets-store':
         $ticketController->store();
         break;
-
+    case 'users-create':
+        $authController->showRegisterForm();
+        break;
+    case 'tickets-create':
+        include __DIR__ . '/../views/tickets/create.php';
+        break;
+case 'users-list':
+        include __DIR__ . '/../views/users/list.php';
+        break;
     case 'tickets-show':    
         $ticketId = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : 0;
         $ticket = $ticketController->show($ticketId);
