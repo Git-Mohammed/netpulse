@@ -3,11 +3,14 @@
  * NetPulse Portal - Front Controller / Central Router
  * 
  * @package NetPulse\Core
- * @version 1.1.1
- * @author  NetPulse Development Team
+ * @version 1.1.2
+ * @author   NetPulse Development Team
  */
 
 declare(strict_types=1);
+
+// تفعيل التخزين المؤقت لمنع أخطاء إرسال الترويسات المبكرة
+ob_start();
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -19,18 +22,14 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../src/Controllers/TicketController.php';
 require_once __DIR__ . '/../src/Controllers/AuthController.php';
 require_once __DIR__ . '/../src/Repositories/UserRepository.php';
-require_once __DIR__ . '/../src/Repositories/UserRepository.php';
-// // استيراد مسارات النطاق (Namespaces) بشكل صحيح لتجنب خطأ Class not found
-// use src\Controllers\TicketController;
-// use src\Controllers\AuthController;
-// use src\Repositories\UserRepository;
 
 // -------------------------------------------------------------------------
 // 2. Controller Initialization
 // -------------------------------------------------------------------------
 $ticketController = new TicketController();
 $authController   = new AuthController();
-$userRepo = new UserRepository();
+$userRepo         = new UserRepository();
+
 $userRepo->ensureDefaultAdminExists(); // سيتم إنشاء المستخدم تلقائياً إذا كان الجدول فارغاً
 $page = filter_input(INPUT_GET, 'page', FILTER_DEFAULT) ?? 'dashboard';
 
@@ -68,7 +67,25 @@ switch ($page) {
 }
 
 // -------------------------------------------------------------------------
-// 5. Global Data Preparation & Layout Header
+// 5. Processing Action Routes (BEFORE Outputting HTML Layouts)
+// -------------------------------------------------------------------------
+// معالجة الطلبات التي تستدعي إعادة توجيه (Redirect) قبل طباعة أي مخرجات
+switch ($page) {
+    case 'tickets-store':
+        $ticketController->store();
+        exit;
+
+    case 'tickets-assign':
+        $ticketController->assignEngineer();
+        exit;
+
+    case 'tickets-update-status':
+        $ticketController->updateStatus();
+        exit;
+}
+
+// -------------------------------------------------------------------------
+// 6. Global Data Preparation & Layout Header
 // -------------------------------------------------------------------------
 $data = $ticketController->index();
 $tickets = $data['tickets'] ?? [];
@@ -76,7 +93,7 @@ $tickets = $data['tickets'] ?? [];
 include __DIR__ . '/../views/layouts/header.php';
 
 // -------------------------------------------------------------------------
-// 6. Centralized Request Routing & Dispatcher
+// 7. Centralized View Rendering & Dispatcher
 // -------------------------------------------------------------------------
 switch ($page) {
     case 'dashboard':
@@ -91,34 +108,20 @@ switch ($page) {
         include __DIR__ . '/../views/tickets/create.php';
         break;
 
-    case 'tickets-store':
-        $ticketController->store();
-        break;
     case 'users-create':
         $authController->showRegisterForm();
         break;
-    case 'tickets-create':
-        include __DIR__ . '/../views/tickets/create.php';
-        break;
-case 'users-list':
+
+    case 'users-list':
         include __DIR__ . '/../views/users/list.php';
         break;
+
     case 'tickets-show':    
         $ticketId = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : 0;
         $ticket = $ticketController->show($ticketId);
-        
-        $userRepo = new UserRepository();
         $engineers = $userRepo->getAllEngineers();
 
         include __DIR__ . '/../views/tickets/show.php';
-        break;
-
-    case 'tickets-assign':
-        $ticketController->assignEngineer();
-        break;
-
-    case 'tickets-update-status':
-        $ticketController->updateStatus();
         break;
 
     default:
