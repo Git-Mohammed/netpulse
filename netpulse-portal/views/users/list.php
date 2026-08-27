@@ -256,47 +256,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- مثال برمجي لتعبئة البيانات من قاعدة البيانات باستخدام PHP -->
-                        <?php if (!empty($users)): ?>
-                            <?php foreach ($users as $user): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($user['user_id']) ?></td>
-                                    <td><strong><?= htmlspecialchars($user['username']) ?></strong></td>
-                                    <td><?= htmlspecialchars($user['email']) ?></td>
-                                    <td>
-                                        <?php if ($user['role'] === 'ADMIN'): ?>
-                                            <span class="badge badge-admin">مدير النظام (Admin)</span>
-                                        <?php else: ?>
-                                            <span class="badge badge-engineer">مهندس دعم (Engineer)</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><?= htmlspecialchars($user['created_at']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <!-- بيانات تجريبية مطابقة لجدولك في حال عدم توفر متغير الـ users -->
-                            <tr>
-                                <td>1</td>
-                                <td><strong>admin_fares</strong></td>
-                                <td>fares@netpulse.local</td>
-                                <td><span class="badge badge-admin">مدير النظام (Admin)</span></td>
-                                <td>2026-01-10 08:00:00</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><strong>eng_sara</strong></td>
-                                <td>sara@netpulse.local</td>
-                                <td><span class="badge badge-engineer">مهندس دعم (Engineer)</span></td>
-                                <td>2026-01-12 09:30:00</td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td><strong>admin</strong></td>
-                                <td>admin@netpulse.local</td>
-                                <td><span class="badge badge-admin">مدير النظام (Admin)</span></td>
-                                <td>2026-08-27 01:00:54</td>
-                            </tr>
-                        <?php endif; ?>
+<!-- جزء الحلقة التكرارية داخل جدول list.php -->
+<?php if (!empty($users)): ?>
+    <?php foreach ($users as $user): ?>
+        <tr>
+            <!-- في حال كانت الخصائص public أو تستخدم Getters مثل $user->getId() -->
+            <td><?= htmlspecialchars((string)($user->user_id ?? $user->getId())) ?></td>
+            <td><strong><?= htmlspecialchars($user->username ?? $user->getUsername()) ?></strong></td>
+            <td><?= htmlspecialchars($user->email ?? $user->getEmail()) ?></td>
+            <td>
+                <?php 
+                    $role = $user->role ?? $user->getRole();
+                    if ($role === 'ADMIN'): 
+                ?>
+                    <span class="badge badge-admin">مدير النظام (Admin)</span>
+                <?php else: ?>
+                    <span class="badge badge-engineer">مهندس دعم (Engineer)</span>
+                <?php endif; ?>
+            </td>
+            <td><?= htmlspecialchars($user->created_at ?? $user->getCreatedAt()) ?></td>
+        </tr>
+    <?php endforeach; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            لا يوجد مستخدمين مسجلين حالياً.
+        </td>
+    </tr>
+<?php endif; ?>
+                           
                     </tbody>
                 </table>
             </div>

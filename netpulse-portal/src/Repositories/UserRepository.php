@@ -97,4 +97,22 @@ class UserRepository {
         }
         return $users;
     }
+
+    /**
+     * Retrieves all users from the database.
+     * 
+     * @return User[]
+     */
+    public function getAllUsers(): array {
+        $sql = "SELECT * FROM WEB_USER ORDER BY user_id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        
+        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $users = [];
+        foreach ($records as $record) {
+            $users[] = new User($record);
+        }
+        return $users;
+    }
 }
