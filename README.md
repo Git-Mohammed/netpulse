@@ -35,322 +35,548 @@
 
 ---
 
-## 🧭 About
+## 1. Project Overview
 
-**NetPulse** is a personal academic project built around a simple idea: different areas of Computer Science become more meaningful when they are understood as parts of a larger system rather than as isolated subjects.
+NetPulse is a modular monitoring and incident-management system inspired by the general workflow of a **Network Operations Center (NOC)**.
 
-The project explores a simplified **Network Operations Center (NOC)** environment where network-related events move through a connected set of software components and eventually become information that can be monitored and acted upon.
+The project represents a monitored environment in which network-related events are generated, processed, evaluated, stored, and presented to users through different interfaces.
 
-NetPulse is intentionally **modular and polyglot**. Python, Java, PHP, relational databases, and an ESP32 are used for different responsibilities within the same overall system.
+The system is intentionally designed as a **polyglot application**, with each technology assigned a specific role rather than attempting to solve the entire problem with one technology.
 
-> **NetPulse is an academic engineering project, not a commercial NOC platform.**
+At a high level:
+
+```text
+Network / Simulation
+        ↓
+Event Ingestion
+        ↓
+Backend Processing
+        ↓
+Alert & Incident Management
+        ↓
+Persistence
+        ↓
+Operational Interfaces
+```
+
+The project is primarily a practical exploration of **system integration and software architecture**.
 
 ---
 
-## 🎓 Why NetPulse?
+# 2. Motivation
 
 I am currently studying **Computer Science in my second year**.
 
-During my studies, topics such as networking, databases, programming, web development, and software engineering are often introduced separately. I wanted to explore what happens when these concepts are connected through a single practical project.
+During my studies, subjects such as networking, databases, programming, web development, and software engineering are often learned as separate areas. While this is useful for understanding individual concepts, it does not always show how those concepts interact when they become parts of a larger system.
 
-NetPulse is the result of that motivation.
+NetPulse was created from that interest.
 
-Rather than treating every technology as a separate exercise, the project provides a common context in which their relationships can be explored, implemented, and understood.
+The project provides a practical environment in which different areas of Computer Science can be connected through a single system rather than being treated as isolated exercises.
+
+The goal is not to build a commercial NOC product. The goal is to understand how the different technical pieces fit together and how decisions in one part of the system affect the others.
 
 ---
 
-## 🎯 Vision
+# 3. Vision
 
-The vision of NetPulse is to build a **small, coherent operational system** that demonstrates a complete journey from an observed event to an operational response.
+The vision of NetPulse is to create a **small but coherent operational platform** that demonstrates a complete lifecycle from an observed network event to an operational response.
 
-At a conceptual level:
+The system should make it possible to follow a problem through the platform:
 
 ```text
-Something Happens
+Something happens
        ↓
-The System Receives It
+The system receives it
        ↓
-The Event Is Evaluated
+The backend understands it
        ↓
-An Alert May Be Raised
+A rule determines its importance
        ↓
-An Incident May Be Created
+An alert may be created
        ↓
-An Engineer Responds
+An incident may be opened
        ↓
-The Problem Is Resolved
+An engineer handles it
        ↓
-The History Is Preserved
+The problem is resolved
+       ↓
+The history remains recorded
 ```
 
-The emphasis is on **understanding the whole system**, not on maximizing its size or complexity.
+This end-to-end perspective is the main idea behind the project.
 
 ---
 
-## 🔭 System at a Glance
+# 4. Nature of the System
 
-```mermaid
-flowchart LR
+NetPulse is designed as a:
 
-    A["🌐 Network Simulation"]
-    B["🐍 Python Bridge"]
-    C["☕ Java Backend"]
-    D[("🗄️ Oracle")]
-    E["🖥️ Desktop Client"]
-    F["🌍 PHP Web Portal"]
-    G[("🗃️ MySQL")]
-    H["📟 ESP32 Display"]
+- **Modular system** — functionality is divided into clear components.
+- **Event-driven system** — operational changes enter the system as events.
+- **Polyglot system** — different technologies are used for different responsibilities.
+- **Database-backed system** — important operational state is persisted.
+- **Multi-interface system** — the same operational information can be presented through different clients.
+- **Academic engineering project** — the architecture is intentionally realistic but remains appropriate for a student project.
 
-    A --> B
-    B --> C
-    C --> D
-    C --> E
-    C --> F
-    F --> G
-    C --> H
+The system is not intended to simulate every aspect of a real enterprise NOC. It focuses on the parts that are useful for understanding the underlying engineering concepts.
+
+---
+
+# 5. Main Components
+
+## Network Simulation
+
+The network simulation represents the monitored environment.
+
+It can generate events such as:
+
+```text
+Device failure
+Interface down
+Interface recovery
+Other simulated operational events
 ```
 
-The diagram represents the **logical relationship between the project's main parts**, not a deployment specification.
+The simulator provides a controlled environment in which the rest of the system can be tested.
 
 ---
 
-## 🧩 Project Nature
+## Python Bridge
 
-NetPulse is primarily:
+The Python Bridge acts as the boundary between raw or simulated network information and the main application.
 
-| Characteristic      | Description                                                                |
-| ------------------- | -------------------------------------------------------------------------- |
-| 🧱 **Modular**      | Responsibilities are divided into clearly separated components.            |
-| ⚡ **Event-driven** | Operational changes are represented as events moving through the system.   |
-| 🔗 **Integrated**   | Different areas of Computer Science are connected through one project.     |
-| 🛠️ **Practical**    | The project is intended to be built and demonstrated, not only documented. |
-| 🎓 **Academic**     | The scope and complexity remain appropriate for a student project.         |
-| 🌱 **Evolving**     | The architecture can grow as the project and learning objectives develop.  |
+Its basic responsibility is:
 
----
+```text
+Receive
+  ↓
+Parse
+  ↓
+Validate
+  ↓
+Normalize
+  ↓
+Forward
+```
 
-## 🧭 Core Concept
-
-NetPulse revolves around a simple operational chain:
-
-**Event → Alert → Incident → Ticket → Resolution**
-
-These concepts represent different stages of the same operational story:
-
-- **Event** — something happened.
-- **Alert** — the event has become relevant to monitoring.
-- **Incident** — the condition requires operational attention.
-- **Ticket** — the work is formally tracked.
-- **Resolution** — the problem has been addressed and closed.
-
-Not every event needs to become an incident or ticket.
+The Bridge prepares events in a consistent format before sending them to the Java Backend. This keeps input-processing concerns separate from the main business logic. fileciteturn0file0L3-L20
 
 ---
 
-## 🛠️ Technology Landscape
+## Java Backend
 
-NetPulse uses different technologies to represent different areas of the system:
+The Java Backend is the central processing component of NetPulse.
 
-| Technology             | Role                                          |
-| ---------------------- | --------------------------------------------- |
-| 🐍 **Python**          | Network simulation and event ingestion        |
-| ☕ **Java**            | Core application processing                   |
-| 🌐 **PHP**             | Web-based operational and ticketing interface |
-| 🗄️ **Oracle Database** | Operational system data                       |
-| 🗃️ **MySQL**           | Web and ticketing data                        |
-| 🖥️ **Java Desktop**    | Real-time monitoring interface                |
-| 📟 **ESP32 / C++**     | Physical display of selected information      |
-
-The purpose of using multiple technologies is not to make the project unnecessarily complex. It is to explore how different technical domains can fit together.
-
----
-
-## 📟 ESP32 Role
-
-The ESP32 is intentionally kept simple.
-
-It acts as a **physical display component** for selected NetPulse information.
-
-It is **not** part of the telemetry-ingestion path and does not send network events or sensor telemetry back to the application.
+It receives normalized events, applies application logic, evaluates alert rules, manages incidents, communicates with operational clients, and coordinates persistence.
 
 Conceptually:
 
 ```text
-NetPulse
-   │
-   └── Selected Information
-             ↓
-         📟 ESP32
-         Display
+Incoming Event
+      ↓
+Validation
+      ↓
+Business Rules
+      ↓
+Alert
+      ↓
+Incident
+      ↓
+Operational Response
 ```
+
+The backend is therefore the main point where raw events become meaningful application state. fileciteturn0file0L66-L88
 
 ---
 
-## 🔄 Workflow
+## Oracle Database
 
-The project's high-level workflow is:
+Oracle represents the main operational data store for the backend.
+
+The project associates it with data such as:
+
+- devices,
+- events,
+- alert rules,
+- alerts,
+- incidents,
+- audit records.
+
+The purpose is to maintain the system's operational history and important state in a structured relational database. fileciteturn0file0L283-L298
+
+---
+
+## PHP Web Portal
+
+The PHP application provides the web-based operational side of the system.
+
+Its main purpose is to support workflows such as:
+
+```text
+Login
+  ↓
+View Ticket
+  ↓
+Assign / Update
+  ↓
+Add Comment
+  ↓
+Resolve / Close
+```
+
+The portal is intended to be a practical interface for managing operational work rather than the place where the core event-processing logic lives.
+
+---
+
+## MySQL Database
+
+MySQL supports the web-facing ticketing domain.
+
+It is intended for information such as:
+
+- tickets,
+- comments,
+- ticket history,
+- web users.
+
+The project therefore separates the operational backend data from the web ticketing data rather than treating both applications as one database-bound application.
+
+---
+
+## Java Desktop Client
+
+The Java desktop application represents the monitoring side of the system.
+
+Its purpose is to provide a real-time operational view of information such as:
+
+- current events,
+- alerts,
+- incidents,
+- system status.
+
+The desktop client is focused primarily on **monitoring and visualization**.
+
+---
+
+## ESP32 Display
+
+The ESP32 provides a small physical representation of the system.
+
+Its role in NetPulse is intentionally limited to **displaying selected information**.
+
+For example:
+
+```text
+NETPULSE
+STATUS: ONLINE
+
+ALERTS: 1
+DEVICE: Core-R2
+LEVEL: CRITICAL
+```
+
+The ESP32 is not part of the telemetry-ingestion architecture.
+
+It does not act as a sensor source for the backend and does not send events back into NetPulse.
+
+---
+
+# 6. System Structure
+
+The logical structure of NetPulse can be represented as:
+
+```mermaid
+flowchart LR
+
+    A["Network Simulation"]
+    B["Python Bridge"]
+    C["Java Backend"]
+    D[("Oracle Database")]
+    E["Java Desktop Client"]
+    F["PHP Web Portal"]
+    G[("MySQL Database")]
+    H["ESP32 Display"]
+
+    A --> B
+    B --> C
+
+    C --> D
+    C --> E
+    C --> F
+    C --> H
+
+    F --> G
+```
+
+The important idea is not the number of technologies, but the **boundary between their responsibilities**.
+
+---
+
+# 7. Core Workflow
+
+The main NetPulse workflow follows a simple operational lifecycle.
 
 ```mermaid
 flowchart TD
 
-    A["🌐 Operational Event"]
-    B["🐍 Event Ingestion"]
-    C["☕ Backend Processing"]
-    D{"Business Evaluation"}
-    E["🔔 Alert"]
-    F["📋 Incident"]
-    G["🎫 Ticket"]
-    H["👨‍💻 Engineer Response"]
-    I["✅ Resolution"]
-    J["📝 History"]
+    A["Network Event"] --> B["Python Bridge"]
+    B --> C["Normalized Event"]
+    C --> D["Java Backend"]
+    D --> E{"Evaluate Rule"}
 
-    A --> B
-    B --> C
-    C --> D
-    D -->|"Requires Attention"| E
-    D -->|"No Action"| J
-    E --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
+    E -->|"No significant condition"| F["Store / Update State"]
+    E -->|"Alert required"| G["Create Alert"]
+    G --> H{"Incident Required?"}
+
+    H -->|"No"| I["Notify Monitoring Client"]
+    H -->|"Yes"| J["Create Incident"]
+
+    J --> K["Ticket Workflow"]
+    K --> L["Engineer Action"]
+    L --> M["Resolution"]
+    M --> N["Audit / History"]
+
+    I --> N
+    F --> N
 ```
 
-This workflow is the conceptual center of NetPulse.
+---
+
+# 8. Event → Alert → Incident → Ticket
+
+One of the most important concepts in NetPulse is the distinction between these four stages.
+
+| Stage        | Meaning                                          | Example                               |
+| ------------ | ------------------------------------------------ | ------------------------------------- |
+| **Event**    | Something happened                               | `Gi0/1 went DOWN`                     |
+| **Alert**    | The event was evaluated as important             | `CRITICAL: Core-R2 uplink down`       |
+| **Incident** | The condition requires operational investigation | `INC-1001 Core-R2 connectivity issue` |
+| **Ticket**   | A formal work item is created for an engineer    | `TKT-1001 Investigate Core-R2 uplink` |
+
+This means that not every event automatically becomes a ticket.
+
+The backend first evaluates the event, then determines whether it is significant enough to require an alert or incident. The source architecture follows the same general distinction between Event, Alert, Incident, and Ticket. fileciteturn0file0L123-L159
 
 ---
 
-## 📐 Design Principles
+# 9. Business Logic
 
-NetPulse follows a few straightforward principles:
+The project's business logic is intentionally simple.
 
-### Separation of Responsibility
-
-Each component should have a clear purpose rather than mixing unrelated concerns.
-
-### Simplicity
-
-The project should remain understandable and achievable. Complexity is added only when it provides a clear benefit.
-
-### Integration
-
-The value of the project comes from the relationships between components, not from any individual technology.
-
-### Traceability
-
-Important operational actions should leave a clear history.
-
-### Incremental Development
-
-The system is built progressively, with the core workflow taking priority over secondary features.
-
----
-
-## 📁 Repository Overview
-
-The repository is organized around major project areas:
+For example:
 
 ```text
-NetPulse/
-│
-├── backend/       # Java backend
-├── bridge/        # Python bridge
-├── desktop/       # Desktop monitoring client
-├── web/           # PHP web portal
-├── firmware/      # ESP32 display
-├── database/      # Database assets
-├── network/       # Network simulation
-├── docs/          # Project documentation
-└── README.md
+IF
+    device role = CORE
+AND
+    event type = LINK_DOWN
+
+THEN
+    severity = CRITICAL
+    create alert
 ```
 
-This structure provides a high-level map of the repository without prescribing implementation details.
+A critical condition may then be promoted:
+
+```text
+Alert
+  ↓
+Incident
+  ↓
+Ticket
+```
+
+The purpose of these rules is not to create a sophisticated rule engine. It is to demonstrate how raw events can be translated into operational decisions.
 
 ---
 
-## 📌 Scope
+# 10. Monitoring and Response
 
-NetPulse focuses on:
+NetPulse has two main forms of human interaction.
 
-- network-event simulation;
-- event processing;
-- monitoring;
-- alerting;
-- incident and ticket workflows;
-- relational data persistence;
-- real-time operational visibility;
-- basic physical information display.
+### Monitoring
 
-The project does **not** attempt to become a full commercial NOC or enterprise ITSM platform.
+The desktop client focuses on showing what is happening now:
 
----
+```text
+Events
+Alerts
+Incidents
+System Status
+```
 
-## 🚧 Current Status
+### Operational Response
 
-**Active Development**
+The web portal focuses on what the engineer does about it:
 
-The overall architecture and project direction are established, while implementation continues incrementally.
+```text
+Ticket
+Assignment
+Comments
+Status
+Resolution
+```
 
-The project is currently moving toward its **Minimum Viable Product (MVP)**.
-
----
-
-## 🗺️ Roadmap
-
-### Foundation
-
-- [x] Project concept and architectural direction
-- [x] Core component definition
-- [x] Repository structure
-- [x] Initial data-model direction
-
-### MVP
-
-- [ ] Event simulation and ingestion
-- [ ] Java backend processing
-- [ ] Basic alert and incident flow
-- [ ] Operational persistence
-- [ ] PHP ticketing workflow
-- [ ] Desktop monitoring
-- [ ] ESP32 information display
-- [ ] End-to-end demonstration
-
-### Later
-
-- [ ] Refinement based on practical testing
-- [ ] Documentation improvements
-- [ ] Additional capabilities where they provide genuine value
-
-> The roadmap is intentionally flexible. The priority is a stable and understandable core system.
+This provides a simple separation between **observing the system** and **managing the resulting work**.
 
 ---
 
-## 📚 Documentation
+# 11. Auditability
 
-Additional project documentation will be maintained in the [`docs`](./docs) directory.
+The system maintains a basic history of important actions.
 
-The README provides the **project-level view**.
+For example:
 
-Detailed design decisions, requirements, data models, interfaces, and implementation notes belong in the project documentation rather than in this file.
+```text
+14:32  Event detected
+14:32  Alert created
+14:32  Incident opened
+14:35  Ticket assigned
+14:40  Engineer updated ticket
+14:48  Incident resolved
+14:50  Ticket closed
+```
+
+The purpose of the audit trail is straightforward:
+
+> **The system should be able to explain what happened and what changed.**
+
+The source architecture also identifies audit logging as part of the backend's operational data model.
 
 ---
 
-## 🧑‍💻 Author
+# 12. Technology Philosophy
 
-### Mohamed Bin Fares
+NetPulse uses different technologies because each part of the project represents a different technical concern.
 
-**Computer Science Student — Second Year**
+```text
+Python
+→ Simulation and Event Ingestion
 
-NetPulse is a personal academic project created to explore the practical connection between:
+Java
+→ Backend Processing and Business Logic
 
-**Networking · Software Architecture · Backend Development · Databases · Web Development · Desktop Applications · Embedded Systems**
+Oracle
+→ Operational Persistence
+
+PHP
+→ Web-based Ticketing
+
+MySQL
+→ Ticketing Persistence
+
+Java Desktop
+→ Real-Time Monitoring
+
+ESP32
+→ Physical Information Display
+```
+
+The purpose is not to use as many technologies as possible.
+
+The purpose is to understand the **relationships between technologies and system boundaries**.
 
 ---
 
-<div align="center">
+# 13. What NetPulse Represents
 
-### 📡 NetPulse
+NetPulse represents a simplified version of an operational monitoring environment.
 
-_Learning by connecting the pieces._
+It demonstrates:
 
-</div>
+- event generation,
+- event normalization,
+- backend processing,
+- rule-based alerting,
+- incident management,
+- ticket workflows,
+- database persistence,
+- real-time monitoring,
+- basic auditing,
+- interaction with a small embedded display.
+
+It should be understood as a **learning-oriented system model**, not as a full enterprise NOC implementation.
+
+---
+
+# 14. Current Project Direction
+
+The architecture is intended to remain understandable and practical.
+
+The priority is:
+
+```text
+Clear Responsibilities
+        +
+Simple Interfaces
+        +
+Working End-to-End Flow
+        =
+Useful System
+```
+
+The project should avoid adding technical infrastructure simply because it is common in large enterprise systems.
+
+Every component should have a reason to exist within the scope of the project.
+
+---
+
+# 15. MVP Phase
+
+After establishing the overall project structure and architecture, development will move into the **Minimum Viable Product (MVP)** phase.
+
+The MVP will focus on proving the core workflow rather than implementing every possible feature.
+
+### MVP will contain:
+
+- Python network event simulation;
+- Python Bridge for event normalization;
+- Java Backend for event processing and basic business rules;
+- Oracle persistence for core operational data;
+- basic alerts and incident creation;
+- a simple PHP ticketing portal;
+- MySQL persistence for ticketing;
+- a Java desktop view for important real-time events;
+- a simple ESP32 information display;
+- basic audit logging.
+
+### MVP priority
+
+```text
+Event
+ ↓
+Process
+ ↓
+Alert
+ ↓
+Incident
+ ↓
+Ticket
+ ↓
+Resolution
+ ↓
+Audit
+```
+
+The goal of the MVP is to make this complete flow **working, understandable, and demonstrable within the two-week implementation period**.
+
+---
+
+# 16. Project Principle
+
+> **NetPulse is not about building the biggest system possible. It is about building a complete system that makes the relationships between its parts understandable.**
+
+The project will therefore prioritize:
+
+**clarity → integration → correctness → simplicity → extension**
+
+rather than unnecessary complexity.
+
+---
+
+# 17. Author
+
+**Mohamed Bin Fares**  
+Computer Science Student — Second Year
+
+NetPulse is a personal academic project developed to explore the practical integration of software architecture, networking, databases, backend development, web applications, desktop systems, and embedded hardware.
