@@ -8,7 +8,7 @@
  * 
  * @package NetPulse\Models
  * @author Mohammed Bin Fares
- * @version 1.0.0
+ * @version 1.1.0
  */
 class User {
 
@@ -50,5 +50,60 @@ class User {
             $this->role      = $data['role'] ?? 'ENGINEER';
             $this->createdAt = $data['created_at'] ?? '';
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters & Accessors
+    // -------------------------------------------------------------------------
+
+    public function getId(): int {
+        return $this->userId;
+    }
+
+    public function getUsername(): string {
+        return $this->username;
+    }
+
+    public function getEmail(): string {
+        return $this->email;
+    }
+
+    public function getRole(): string {
+        return $this->role;
+    }
+
+    public function getCreatedAt(): string {
+        return $this->createdAt;
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper Methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is an Administrator.
+     */
+    public function isAdmin(): bool {
+        return strtoupper($this->role) === 'ADMIN';
+    }
+
+    /**
+     * Checks if the user is a Support Engineer.
+     */
+    public function isEngineer(): bool {
+        return strtoupper($this->role) === 'ENGINEER' || strtoupper($this->role) === 'SUPPORT_ENGINEER';
+    }
+
+    /**
+     * Converts the model properties to an associative array.
+     */
+    public function toArray(): array {
+        return [
+            'user_id'    => $this->userId,
+            'username'   => $this->username,
+            'email'      => $this->email,
+            'role'       => $this->role,
+            'created_at' => $this->createdAt,
+        ];
     }
 }

@@ -105,7 +105,12 @@ switch ($page) {
         break;
 
     case 'tickets-create':
+        $engineers = $userRepo->getAllEngineers();
         include __DIR__ . '/../views/tickets/create.php';
+        break;
+
+    case 'users-store':
+        $authController->storeUser();
         break;
 
     case 'users-create':
@@ -113,9 +118,9 @@ switch ($page) {
         break;
 
     case 'users-list':
+        $users = $userRepo->getAllUsers();
         include __DIR__ . '/../views/users/list.php';
         break;
-
     case 'tickets-show':    
         $ticketId = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : 0;
         $ticket = $ticketController->show($ticketId);

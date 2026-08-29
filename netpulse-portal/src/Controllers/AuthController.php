@@ -79,7 +79,7 @@ require_once __DIR__ . '/../../views/auth/login.php';    }
             $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
-            $role = $_POST['role'] ?? 'SUPPORT_ENGINEER';
+            $role = $_POST['role'] ?? 'ENGINEER';
 
             if (empty($username) || empty($email) || empty($password)) {
                 $error = "جميع الحقول الأساسية مطلوبة.";

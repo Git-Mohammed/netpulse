@@ -1,5 +1,18 @@
 <?php
-$ticket = $ticket ?? null;
+// جلب بيانات الجلسة الحالية
+$currentUserId = $_SESSION['user_id'] ?? 0;
+$isAdmin = isset($_SESSION['role']) && strtoupper($_SESSION['role']) === 'ADMIN';
+
+// استخراج مُعرف المهندس المسندة إليه التذكرة بأكثر من طريقة لضمان التقاطه
+$assignedEngineerId = $ticket->assigned_to 
+    ?? $ticket->assignedTo 
+    ?? ($ticket->assignedEngineer->userId ?? $ticket->assignedEngineer->id ?? 0);
+
+// التحقق مما إذا كان المستخدم الحالي هو المهندس المعين للتذكرة
+$isAssignedEngineer = ((int)$assignedEngineerId === (int)$currentUserId) && ((int)$currentUserId > 0);
+
+// الصلاحية لتحديث الحالة: أدمن أو المهندس المسؤول عن التذكرة
+$canUpdateStatus = $isAdmin || $isAssignedEngineer;
 ?>
 
 <style>
@@ -18,6 +31,8 @@ $ticket = $ticket ?? null;
         border: 1px solid #e5e7eb;
         padding: 24px;
         margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
     }
     .ticket-header {
         display: flex;
@@ -47,7 +62,7 @@ $ticket = $ticket ?? null;
     }
     .meta-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
         gap: 20px;
         margin-top: 20px;
     }
@@ -90,11 +105,25 @@ $ticket = $ticket ?? null;
         color: #4b5563;
         margin-bottom: 24px;
     }
+
+    /* تقسيم الكروت مرن ويتكيف إذا ظهر كارت واحد */
     .actions-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
         gap: 24px;
+        align-items: stretch;
     }
+    .actions-grid .modern-card {
+        margin-bottom: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+    .actions-grid form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
     @media (max-width: 768px) {
         .actions-grid { grid-template-columns: 1fr; }
         .ticket-header { flex-direction: column; gap: 12px; }
@@ -135,6 +164,7 @@ $ticket = $ticket ?? null;
         cursor: pointer;
         transition: all 0.2s;
         border: none;
+        margin-top: auto;
     }
     .btn-primary { background: #3b82f6; color: #fff; }
     .btn-primary:hover { background: #2563eb; }
@@ -179,7 +209,6 @@ $ticket = $ticket ?? null;
                     <h2><?php echo htmlspecialchars($ticket->title, ENT_QUOTES, 'UTF-8'); ?></h2>
                 </div>
                 <div>
-                    <!-- احتفظت بـ badge class الخاصة بك إذا كانت مسؤولة عن الألوان -->
                     <span class="badge badge-<?php echo strtolower($ticket->priority); ?>" style="display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
                         <?php echo htmlspecialchars($ticket->priority, ENT_QUOTES, 'UTF-8'); ?>
                     </span>
@@ -208,7 +237,7 @@ $ticket = $ticket ?? null;
                     </div>
                     <div class="meta-details">
                         <span>المهندس المسؤول</span>
-                        <?php if ($ticket->assignedEngineer && !empty($ticket->assignedEngineer->username)): ?>
+                        <?php if (isset($ticket->assignedEngineer) && !empty($ticket->assignedEngineer->username)): ?>
                             <strong><?php echo htmlspecialchars($ticket->assignedEngineer->username, ENT_QUOTES, 'UTF-8'); ?></strong>
                         <?php else: ?>
                             <strong style="color: #9ca3af; font-style: italic;">غير مُعين</strong>
@@ -243,72 +272,76 @@ $ticket = $ticket ?? null;
             </div>
         <?php endif; ?>
 
-        <!-- كارت الإدارة والعمليات -->
-        <div class="actions-grid">
-            
-            <!-- تحديث الحالة -->
-            <div class="modern-card" style="margin-bottom: 0;">
-                <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">تحديث الحالة والمراجعة</h3>
-                <form action="index.php?page=tickets-update-status" method="POST">
-                    <input type="hidden" name="ticket_id" value="<?php echo $ticket->ticketId; ?>">
-                    
-                    <div class="form-group">
-                        <label class="modern-label">الحالة الجديدة</label>
-                        <select name="status" class="modern-input">
-                            <option value="OPEN" <?php echo ($ticket->status === 'OPEN') ? 'selected' : ''; ?>>OPEN (مفتوحة)</option>
-                            <option value="IN_PROGRESS" <?php echo ($ticket->status === 'IN_PROGRESS') ? 'selected' : ''; ?>>IN_PROGRESS (قيد العمل)</option>
-                            <option value="RESOLVED" <?php echo ($ticket->status === 'RESOLVED') ? 'selected' : ''; ?>>RESOLVED (محلولة)</option>
-                            <option value="CLOSED" <?php echo ($ticket->status === 'CLOSED') ? 'selected' : ''; ?>>CLOSED (مغلقة)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="modern-label">سبب التغيير (Audit Note)</label>
-                        <input type="text" name="note" class="modern-input" placeholder="اكتب ملاحظة تشغيلية للتسجيل...">
-                    </div>
+        <?php if ($canUpdateStatus || $isAdmin): ?>
+            <div class="actions-grid">
+                
+                <!-- تحديث الحالة (يظهر للأدمن أو المهندس المسندة له فقط) -->
+                <?php if ($canUpdateStatus): ?>
+                    <div class="modern-card">
+                        <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">تحديث الحالة والمراجعة</h3>
+                        <form action="index.php?page=tickets-update-status" method="POST">
+                            <input type="hidden" name="ticket_id" value="<?php echo $ticket->ticketId; ?>">
+                            
+                            <div class="form-group">
+                                <label class="modern-label">الحالة الجديدة</label>
+                                <select name="status" class="modern-input">
+                                    <option value="OPEN" <?php echo ($ticket->status === 'OPEN') ? 'selected' : ''; ?>>OPEN (مفتوحة)</option>
+                                    <option value="IN_PROGRESS" <?php echo ($ticket->status === 'IN_PROGRESS') ? 'selected' : ''; ?>>IN_PROGRESS (قيد العمل)</option>
+                                    <option value="RESOLVED" <?php echo ($ticket->status === 'RESOLVED') ? 'selected' : ''; ?>>RESOLVED (محلولة)</option>
+                                    <option value="CLOSED" <?php echo ($ticket->status === 'CLOSED') ? 'selected' : ''; ?>>CLOSED (مغلقة)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="modern-label">سبب التغيير (Audit Note)</label>
+                                <input type="text" name="note" class="modern-input" placeholder="اكتب ملاحظة تشغيلية للتسجيل...">
+                            </div>
 
-                    <button type="submit" class="modern-btn btn-primary" style="width: 100%;">
-                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        تنفيذ وحفظ السجل
-                    </button>
-                </form>
+                            <button type="submit" class="modern-btn btn-primary" style="width: 100%;">
+                                <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                تنفيذ وحفظ السجل
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+
+                <!-- إدارة التعيين (للأدمن فقط) -->
+                <?php if ($isAdmin): ?>
+                    <div class="modern-card">
+                        <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">إدارة التعيين</h3>
+                        <form action="index.php?page=tickets-assign" method="POST">
+                            <input type="hidden" name="ticket_id" value="<?php echo $ticket->ticketId; ?>">
+                            
+                            <div class="form-group">
+                                <label class="modern-label">المهندس المسؤول</label>
+                                <select name="assigned_to" class="modern-input">
+                                    <option value="">-- اختر المهندس --</option>
+                                    <?php 
+                                        $engineers = $engineers ?? []; 
+                                        foreach ($engineers as $engineer): 
+                                    ?>
+                                        <option value="<?php echo $engineer->userId; ?>" <?php echo (isset($ticket->assignedTo) && (int)$ticket->assignedTo === (int)$engineer->userId) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($engineer->username, ENT_QUOTES, 'UTF-8'); ?> (<?php echo $engineer->role; ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="modern-btn btn-dark" style="width: 100%;">
+                                <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                تحديث المسؤول
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+
             </div>
-
-            <!-- تعيين المهندس -->
-            <div class="modern-card" style="margin-bottom: 0;">
-                <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">إدارة التعيين</h3>
-                <form action="index.php?page=tickets-assign" method="POST">
-                    <input type="hidden" name="ticket_id" value="<?php echo $ticket->ticketId; ?>">
-                    
-                    <div class="form-group">
-                        <label class="modern-label">المهندس المسؤول</label>
-                        <select name="assigned_to" class="modern-input">
-                            <option value="">-- اختر المهندس --</option>
-                            <?php 
-                                $engineers = $engineers ?? []; 
-                                 foreach ($engineers as $engineer): 
-                            ?>
-<option value="<?php echo $engineer->userId; ?>" <?php echo (isset($ticket->assignedTo) && $ticket->assignedTo === $engineer->userId) ? 'selected' : ''; ?>>                                    <?php echo htmlspecialchars($engineer->username, ENT_QUOTES, 'UTF-8'); ?> (<?php echo $engineer->role; ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="modern-btn btn-dark" style="width: 100%; margin-top: auto;">
-                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        تحديث المسؤول
-                    </button>
-                </form>
+        <?php else: ?>
+            <!-- تنبيه للمهندس الذي يطالع تذكرة ليست مسندة إليه -->
+            <div class="modern-card" style="text-align: center; color: #6b7280; padding: 20px;">
+                <p style="margin: 0; font-size: 14px;">ملاحظة: هذه التذكرة مسندة لمهندس آخر، لا يمكنك تعديل حالتها.</p>
             </div>
-
-        </div>
-
-        <div style="margin-top: 24px; text-align: right;">
-            <a href="index.php?page=dashboard" class="modern-btn btn-secondary">
-                <svg style="width: 18px; height: 18px; transform: rotate(180deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                العودة للقائمة
-            </a>
-        </div>
+        <?php endif; ?>
 
     <?php endif; ?>
 </div>
