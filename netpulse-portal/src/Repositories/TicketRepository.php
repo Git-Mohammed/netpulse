@@ -123,9 +123,9 @@ class TicketRepository {
      * @param array $data Associative array containing ticket details.
      * @return int Returns the last inserted primary key ID of the new ticket.
      */
-    public function create(array $data): int {
-        $sql = "INSERT INTO TICKET (ticket_number, incident_id, title, description, priority, status, created_at) 
-                VALUES (:ticket_number, :incident_id, :title, :description, :priority, 'OPEN', NOW())";
+   public function create(array $data): int {
+        $sql = "INSERT INTO TICKET (ticket_number, incident_id, title, description, priority, assigned_to, status, created_at) 
+                VALUES (:ticket_number, :incident_id, :title, :description, :priority, :assigned_to, 'OPEN', NOW())";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
@@ -133,7 +133,8 @@ class TicketRepository {
             'incident_id'   => $data['incident_id'] ?? null,
             'title'         => $data['title'],
             'description'   => $data['description'],
-            'priority'      => $data['priority'] ?? 'MEDIUM'
+            'priority'      => $data['priority'] ?? 'MEDIUM',
+            'assigned_to'   => $data['assigned_to'] ?? null // <--- إضافة حقل المسؤول هنا
         ]);
 
         return (int) $this->db->lastInsertId();

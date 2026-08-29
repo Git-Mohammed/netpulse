@@ -1,12 +1,15 @@
 <?php
-$ticket = $ticket ?? null;
-
 // جلب بيانات الجلسة الحالية
 $currentUserId = $_SESSION['user_id'] ?? 0;
 $isAdmin = isset($_SESSION['role']) && strtoupper($_SESSION['role']) === 'ADMIN';
 
+// استخراج مُعرف المهندس المسندة إليه التذكرة بأكثر من طريقة لضمان التقاطه
+$assignedEngineerId = $ticket->assigned_to 
+    ?? $ticket->assignedTo 
+    ?? ($ticket->assignedEngineer->userId ?? $ticket->assignedEngineer->id ?? 0);
+
 // التحقق مما إذا كان المستخدم الحالي هو المهندس المعين للتذكرة
-$isAssignedEngineer = isset($ticket->assignedTo) && (int)$ticket->assignedTo === (int)$currentUserId;
+$isAssignedEngineer = ((int)$assignedEngineerId === (int)$currentUserId) && ((int)$currentUserId > 0);
 
 // الصلاحية لتحديث الحالة: أدمن أو المهندس المسؤول عن التذكرة
 $canUpdateStatus = $isAdmin || $isAssignedEngineer;

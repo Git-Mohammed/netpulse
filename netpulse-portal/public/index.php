@@ -105,6 +105,7 @@ switch ($page) {
         break;
 
     case 'tickets-create':
+        $engineers = $userRepo->getAllEngineers();
         include __DIR__ . '/../views/tickets/create.php';
         break;
 

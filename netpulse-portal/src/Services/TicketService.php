@@ -114,10 +114,7 @@ class TicketService {
         }
     }
     public function generateAutomatedTicket(array $payload): string {
-        // توليد رقم مرجعي تسلسلي افتراضي بناءً على السنة
-        $year = date('Y');
-        $randomNumber = rand(1000, 9999);
-        $ticketNumber = "TKT-{$year}-{$randomNumber}";
+        $ticketNumber =$this->generateTicketNumber();
 
         $ticketData = [
             'ticket_number' => $ticketNumber,
@@ -125,6 +122,45 @@ class TicketService {
             'title'         => $payload['title'],
             'description'   => $payload['description'],
             'priority'      => $payload['priority'] ?? 'CRITICAL'
+        ];
+
+        return $this->ticketRepository->create($ticketData);
+    }
+ 
+    /**
+     * Creates a new operational ticket initiated by a human user with secure role-based assignment.
+     * 
+     * This method generates a unique human-readable ticket tracking number, enforces backend security 
+     * validation regarding ticket ownership based on the user's role (forcing self-assignment 
+     * for ENGINEERS or allowing selection input for ADMINS), and delegates the final database insertion 
+     * to the repository layer.
+     *
+     * @param array $payload An associative array containing ticket details ('title', 'description', 'priority', 'incident_id', 'assigned_to').
+     * @param int $currentUserId The unique identifier of the authenticated user performing the action.
+     * @param string $currentUserRole The role authorization level of the user (e.g., 'ENGINEER', 'ADMIN').
+     * @return string Returns the newly created ticket's primary key ID.
+     * @throws \Exception If the database operation fails.
+     */
+    public function createHumanTicket(array $payload, int $currentUserId, string $currentUserRole): string {
+        $ticketNumber = $this->generateTicketNumber();
+
+        // Enforce backend security validation and role-based ticket assignment routing
+        $assignedTo = null;
+        if ($currentUserRole === 'ENGINEER') {
+            // Force-assign the ticket to the active engineer, ignoring any incoming form input tampering
+            $assignedTo = $currentUserId;
+        } elseif ($currentUserRole === 'ADMIN') {
+            // Permit administrators to assign the ticket using the provided selection input
+            $assignedTo = !empty($payload['assigned_to']) ? (int)$payload['assigned_to'] : null;
+        }
+
+        $ticketData = [
+            'ticket_number' => $ticketNumber,
+            'incident_id'   => $payload['incident_id'] ?? null,
+            'title'         => $payload['title'],
+            'description'   => $payload['description'],
+            'priority'      => $payload['priority'] ?? 'MEDIUM',
+            'assigned_to'   => $assignedTo
         ];
 
         return $this->ticketRepository->create($ticketData);
@@ -147,5 +183,18 @@ class TicketService {
             throw new Exception("فشل تعيين المهندس المسؤول للتذكرة.");
         }
         return true;
+    }
+
+    /**
+     * Generates a unique, human-readable serial ticket tracking number based on the current year 
+     * and a random 4-digit sequence.
+     *
+     * @return string Returns the formatted ticket tracking number (e.g., TKT-2026-XXXX).
+     */
+    private function generateTicketNumber(): string {
+        $year = date('Y');
+        $randomNumber = rand(1000, 9999);
+        
+        return "TKT-{$year}-{$randomNumber}";
     }
 }
