@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "NetPulse — MVP Architecture Design Document.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "NetPulse — MVP Architecture Design Document"
+              "title": "README"
+            }
+          },
+          {
+            "id": "2135b617b5334430",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Docker + Oracle Database Free Development Guide.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Docker + Oracle Database Free Development Guide"
             }
           }
         ]
@@ -185,16 +199,32 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
   "active": "d680342b50dc284b",
   "lastOpenFiles": [
-    "NetPulse_Project_Manifest_General.md",
+    "Untitled.md",
+    "README.md",
+    "Docker + Oracle Database Free Development Guide.md",
+    "Bank-Network-CLI-Configs.md",
+    "21 - Connecting VS Code to Oracle.md",
     "NetPulse — MVP Architecture Design Document.md",
+    "Pasted image 20260903162520.png",
+    "Untitled.canvas",
+    "Untitled.base",
+    "Pasted Image 20260903160132_734.png",
+    "18 - Oracle Data Dictionary.md",
+    "29 - Best Practices.md",
+    "NetPluseERD.excalidraw.md",
+    "db-scripts/01_schema_and_seed.sql",
+    "db-scripts",
+    "New folder",
+    "الدليل التشغيلي والتنفيذي لبناء شبكة البنك متعددة الفروع.md",
+    "NetPulse_Project_Manifest_General.md",
     "NetPulse —  Architecture Design Document.md",
     "README (1).md",
-    "README.md",
     "Unconfirmed 352573.crdownload",
     "Unconfirmed 537284.crdownload",
     "NetPulse Hardware Alert Console (Physical Desk Alarm).md",
