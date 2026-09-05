@@ -58,3 +58,6 @@ coverage/
 # Database local files
 *.db
 *.sqlite
+
+
+*.obsidian
