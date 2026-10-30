@@ -1,0 +1,52 @@
+# ==============================
+# Java / Maven 
+# ==============================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.log
+
+# Maven properties and backups
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ==============================
+# Apache NetBeans
+# ==============================
+nbproject/private/
+nbproject/project.properties
+nbproject/project.xml
+nbbuild/
+dist/
+build/
+nbactions.xml
+nbactions-*.xml
+.nb-gradle/
+
+# ==============================
+# Other IDEs (Optional but recommended for team projects)
+# ==============================
+.idea/
+*.iml
+.vscode/
+
+# ==============================
+# OS Generated Files
+# ==============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
